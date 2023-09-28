@@ -11,18 +11,19 @@ console.log(import.meta.env.DB_PASSWORD);
 export default function App() {
   const [data, setData] = useState(null);
   const [requestParams, setRequestParams] = useState({});
-  const callApi = (requestParams) => {
-    // mock output
-    const data = {
-      count: 2,
-      results: [
-        { name: 'fake thing 1', url: 'http://fakethings.com/1' },
-        { name: 'fake thing 2', url: 'http://fakethings.com/2' },
-      ],
-    };
-    setData(data);
-    setRequestParams(requestParams);
+  const callApi = async (requestParams) => {
+    try {
+      const response = await fetch(requestParams.url, {
+        method: requestParams.method,
+      });
+      const responseData = await response.json();
+      setData(responseData);
+      setRequestParams(requestParams);
+    } catch (error) {
+      console.error(error);
+    }
   };
+
   return (
     <>
       <Header />
