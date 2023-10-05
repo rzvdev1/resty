@@ -3,7 +3,7 @@ import Header from './Components/Header';
 import Footer from './Components/Footer';
 import Form from './Components/Form';
 import Results from './Components/Results';
-import { useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 
 console.log(import.meta.env.VITE_SOME_KEY);
 console.log(import.meta.env.DB_PASSWORD);
@@ -27,11 +27,24 @@ export default function App() {
         return state;
     }
   }
+
+  function previousApiCalls() {
+    localStorage.setItem('previousCalls', JSON.stringify(data));
+    const previousCalls = localStorage.getItem('previousCalls');
+    if (previousCalls) {
+      return JSON.parse(previousCalls);
+    } else {
+      return [];
+    }
+  }
+
   const [data, dispatchData] = useReducer(reducer, {
     data: null,
     requestParams: {},
     headers: null,
   });
+  const prev = useCallback(previousApiCalls, []);
+  console.log('prev', prev);
 
   useEffect(() => {
     if (data && data.requestParams) {
