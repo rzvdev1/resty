@@ -1,22 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 import './Form.scss';
 
 export default function Form({ handleApiCall }) {
-  const [url, setUrl] = useState('');
-  const [method, setMethod] = useState('GET');
+  const ACTIONS = {
+    UPDATE_URL: 'update-url',
+    UPDATE_METHOD: 'update-method',
+  };
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case ACTIONS.UPDATE_URL:
+        return { ...state, url: action.payload };
+      case ACTIONS.UPDATE_METHOD:
+        return { ...state, method: action.payload };
+      default:
+        return state;
+    }
+  }
+
+  const [state, dispatch] = useReducer(reducer, { url: '', method: 'GET' });
 
   useEffect(() => {
-    if (url && method) {
-      console.log(url, method);
+    if (state.url && state.method) {
+      console.log(state.url, state.method);
     }
     return () => {
       console.log('cleanup');
     };
-  }, [url, method]);
+  }, [state]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleApiCall({ url, method });
+    handleApiCall(state);
   };
 
   return (
@@ -25,14 +40,21 @@ export default function Form({ handleApiCall }) {
         <span>URL: </span>
         <input
           type='text'
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
+          value={state.url}
+          onChange={(e) =>
+            dispatch({ type: ACTIONS.UPDATE_URL, payload: e.target.value })
+          }
           required
         />
       </label>
       <label>
         Method:
-        <select value={method} onChange={(e) => setMethod(e.target.value)}>
+        <select
+          value={state}
+          onChange={(e) =>
+            dispatch({ type: ACTIONS.UPDATE_METHOD, payload: e.target.value })
+          }
+        >
           <option value='GET'>GET</option>
           <option value='POST'>POST</option>
           <option value='PUT'>PUT</option>

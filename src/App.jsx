@@ -3,39 +3,60 @@ import Header from './Components/Header';
 import Footer from './Components/Footer';
 import Form from './Components/Form';
 import Results from './Components/Results';
-import { useState, useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 
 console.log(import.meta.env.VITE_SOME_KEY);
 console.log(import.meta.env.DB_PASSWORD);
 
 export default function App() {
-  const [data, setData] = useState(null);
-  const [requestParams, setRequestParams] = useState({});
-  const [headers, setHeaders] = useState(null);
+  const ACTIONS = {
+    SET_DATA: 'set_data',
+    SET_REQUEST_PARAMS: 'set_request_params',
+    SET_HEADERS: 'set_headers',
+  };
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case ACTIONS.SET_DATA:
+        return { ...state, data: action.payload };
+      case ACTIONS.SET_REQUEST_PARAMS:
+        return { ...state, requestParams: action.payload };
+      case ACTIONS.SET_HEADERS:
+        return { ...state, headers: action.payload };
+      default:
+        return state;
+    }
+  }
+  const [data, dispatchData] = useReducer(reducer, {
+    data: null,
+    requestParams: {},
+    headers: null,
+  });
 
   useEffect(() => {
-    if (data && requestParams) {
-      console.log(data, requestParams);
+    if (data && data.requestParams) {
+      console.log(data);
     }
     return () => {
       console.log('cleanup');
     };
-  }, [data, requestParams]);
+  }, [data]);
 
   const callApi = async (requestParams) => {
     try {
       const response = await fetch(requestParams.url, {
         method: requestParams.method,
       });
-      // const responseData = await response.json();
-      // setData(responseData);
-      // setRequestParams(requestParams);
       const responseHeaders = Object.fromEntries(response.headers.entries());
 
       const responseData = await response.json();
-      setData(responseData);
-      setHeaders(responseHeaders);
-      setRequestParams(requestParams);
+
+      dispatchData({ type: ACTIONS.SET_DATA, payload: responseData });
+      dispatchData({ type: ACTIONS.SET_HEADERS, payload: responseHeaders });
+      dispatchData({
+        type: ACTIONS.SET_REQUEST_PARAMS,
+        payload: requestParams,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -44,10 +65,10 @@ export default function App() {
   return (
     <>
       <Header />
-      <div>Request Method: {requestParams.method}</div>
-      <div>URL: {requestParams.url}</div>
+      <div>Request Method: {data.requestParams.method}</div>
+      <div>URL: {data.requestParams.url}</div>
       <Form handleApiCall={callApi} />
-      <Results headers={headers} data={data} />
+      <Results headers={data.headers} data={data} />
       <Footer />
     </>
   );
