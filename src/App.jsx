@@ -3,6 +3,8 @@ import Header from './Components/Header';
 import Footer from './Components/Footer';
 import Form from './Components/Form';
 import Results from './Components/Results';
+import History from './Components/History';
+
 import { useCallback, useEffect, useReducer } from 'react';
 
 console.log(import.meta.env.VITE_SOME_KEY);
@@ -44,7 +46,7 @@ export default function App() {
     headers: null,
   });
   const prev = useCallback(previousApiCalls, []);
-  console.log('prev', prev);
+  // console.log('prev', prev);
 
   useEffect(() => {
     if (data && data.requestParams) {
@@ -82,6 +84,7 @@ export default function App() {
       <div>URL: {data.requestParams.url}</div>
       <Form handleApiCall={callApi} />
       <Results headers={data.headers} data={data} />
+      <History handleApiCall={prev} />
       <Footer />
     </>
   );
